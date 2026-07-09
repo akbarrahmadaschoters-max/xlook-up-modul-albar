@@ -74,6 +74,92 @@ h3 { font-size: 17px; color: var(--navy); margin: 20px 0 8px; }
 .btn.secondary:hover { background: var(--navy-light); }
 .btn.small { padding: 8px 16px; font-size: 13px; }
 .btn:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; }
+/* ─── DARK HERO ─── */
+.hero-dark {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  background: #080808;
+  color: #fff;
+  overflow: hidden;
+  padding: 100px 20px 120px;
+  margin-top: -32px;
+  margin-bottom: 60px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  position: relative;
+}
+.hd-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+.hd-title {
+  font-size: clamp(3.5rem, 10vw, 10rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+.hd-line1 { display: block; }
+.hd-line2 { display: block; margin-left: 15%; }
+.hd-line3 { display: block; text-align: right; }
+.hd-line3-dot { color: #fff; }
+.hd-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 80px;
+  position: relative;
+  z-index: 3;
+}
+.hd-author {
+  font-size: 1.5rem;
+  max-width: 400px;
+  line-height: 1.3;
+  color: rgba(255,255,255,0.9);
+  font-weight: 300;
+}
+.hd-author span { 
+  color: rgba(255,255,255,0.5); 
+  display: block; 
+  font-size: 1.1rem; 
+  margin-top: 12px; 
+}
+.hd-shapes {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1; pointer-events: none;
+}
+.hd-shape { position: absolute; }
+.hds-pink-arrow { top: 40%; left: 18%; width: 45%; max-width: 450px; }
+.hds-yellow-arrow { top: 15%; right: 8%; width: 18%; max-width: 180px; }
+.hds-yellow-arc { bottom: -5%; right: 25%; width: 25%; max-width: 250px; }
+.hds-pink-arc { top: -5%; left: 45%; width: 15%; max-width: 150px; }
+.hds-lines {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+.hds-line {
+  fill: none;
+  stroke: rgba(255,255,255,0.25);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+}
+.hd-nav {
+  position: absolute;
+  top: 30px; right: 40px;
+  z-index: 4;
+  pointer-events: auto;
+}
+.hd-btn {
+  background: #fff; color: #000;
+  padding: 12px 24px; border-radius: 40px;
+  font-size: 12px; font-weight: 700;
+  text-decoration: none; text-transform: uppercase;
+  letter-spacing: 1px; cursor: pointer;
+  border: none;
+}
+.hd-btn:hover { background: #eee; }
+
 /* ─── HERO ─── */
 .hero { text-align: center; padding: 40px 0 20px; }
 .hero .emoji { font-size: 64px; }
@@ -241,11 +327,60 @@ table.data td.highlight-cell { background: var(--orange) !important; color: #fff
 
 <!-- ═══════════ SECTION 1: HOME ═══════════ -->
 <div class="section active" id="s-home">
-  <div class="hero">
-    <div class="emoji">🔍</div>
-    <h1>Belajar VLOOKUP & XLOOKUP</h1>
-    <p>Panduan interaktif untuk tim Operations EduPro. Tanpa jargon rumit — belajar sambil praktek langsung di browser.</p>
-    <button class="btn" onclick="goTo('s-intro')">Mulai Belajar →</button>
+  <div class="hero-dark">
+    <div class="hd-nav">
+      <button class="hd-btn" onclick="goTo('s-intro')">Mulai Belajar</button>
+    </div>
+    <div class="hd-shapes">
+      <svg class="hds-lines" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice">
+        <path class="hds-line" d="M -100 200 Q 150 150 200 400 T 500 600 T 1100 200" />
+        <path class="hds-line" d="M 300 -100 L 300 900" />
+        <path class="hds-line" d="M 700 -100 L 700 900" />
+        <path class="hds-line" d="M -100 500 L 1100 500" />
+      </svg>
+      <!-- Pink Arc (top) -->
+      <svg class="hd-shape hds-pink-arc" viewBox="0 0 100 50">
+        <path d="M 0 0 A 50 50 0 0 0 100 0 Z" fill="#F48BFF" />
+      </svg>
+      <!-- Yellow Arrow (top right) -->
+      <svg class="hd-shape hds-yellow-arrow" viewBox="0 0 100 100">
+        <path d="M30 15 L85 15 L85 70 L65 70 L65 48 L28 85 L15 72 L52 35 L30 35 Z" fill="#FFF01F" />
+      </svg>
+      <!-- Yellow Arc (bottom) -->
+      <svg class="hd-shape hds-yellow-arc" viewBox="0 0 100 50">
+        <path d="M 0 50 A 50 50 0 0 1 100 50 L 75 50 A 25 25 0 0 0 25 50 Z" fill="#FFF01F" />
+      </svg>
+      <!-- Pink 3D Arrow -->
+      <svg class="hd-shape hds-pink-arrow" viewBox="0 0 200 150" overflow="visible">
+        <defs>
+          <linearGradient id="pinkGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#F48BFF" />
+            <stop offset="100%" stop-color="#C638FF" />
+          </linearGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="150%" height="150%">
+            <feDropShadow dx="5" dy="15" stdDeviation="10" flood-color="#000" flood-opacity="0.8"/>
+          </filter>
+        </defs>
+        <path d="M 30 110 C 60 150, 120 140, 150 50" fill="none" stroke="url(#pinkGrad)" stroke-width="35" stroke-linecap="round" filter="url(#shadow)"/>
+        <path d="M 80 50 L 150 50" fill="none" stroke="url(#pinkGrad)" stroke-width="35" stroke-linecap="round" filter="url(#shadow)"/>
+        <path d="M 150 120 L 150 50" fill="none" stroke="url(#pinkGrad)" stroke-width="35" stroke-linecap="round" filter="url(#shadow)"/>
+      </svg>
+    </div>
+    
+    <div class="hd-container">
+      <h1 class="hd-title">
+        <span class="hd-line1">Data</span>
+        <span class="hd-line2">Analysis</span>
+        <span class="hd-line3">Modul V1<span class="hd-line3-dot">.</span></span>
+      </h1>
+      
+      <div class="hd-bottom">
+        <div class="hd-author">
+          by Akbar Rahmada Maulana
+          <span>LINT Bishops</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="analogy">
