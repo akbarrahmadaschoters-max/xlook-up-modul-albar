@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belajar VLOOKUP & XLOOKUP — EduPro Ops Training</title>
+<style>
+:root {
+  --navy: #1F3864;
+  --navy-light: #2E5490;
+  --blue: #2E75B6;
+  --blue-soft: #EBF4FB;
+  --orange: #F4A261;
+  --orange-dark: #E76F51;
+  --green: #1D7A4A;
+  --green-soft: #E8F5E9;
+  --red: #C0392B;
+  --red-soft: #FDF2F2;
+  --bg: #FAFBFC;
+  --card: #FFFFFF;
+  --text: #2D3748;
+  --gray: #718096;
+  --border: #E2E8F0;
+  --yellow-soft: #FFF8E1;
+  --code-bg: #1E1E2E;
+  --code-text: #E6DB74;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+/* ─── NAV ─── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--navy);
+  display: flex; overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+nav button {
+  flex: 1; min-width: 100px;
+  background: none; border: none;
+  color: rgba(255,255,255,.7);
+  padding: 14px 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all .2s;
+}
+nav button:hover { color: #fff; background: rgba(255,255,255,.06); }
+nav button.active { color: var(--orange); border-bottom-color: var(--orange); background: rgba(255,255,255,.04); }
+/* ─── LAYOUT ─── */
+.section { display: none; max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+.section.active { display: block; animation: fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+h1 { font-size: 32px; color: var(--navy); margin-bottom: 8px; }
+h2 { font-size: 24px; color: var(--navy); margin: 28px 0 12px; }
+h3 { font-size: 17px; color: var(--navy); margin: 20px 0 8px; }
+.subtitle { color: var(--gray); font-size: 15px; margin-bottom: 24px; }
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.btn {
+  display: inline-block; background: var(--orange); color: #fff;
+  border: none; border-radius: 8px; padding: 12px 28px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: all .15s;
+}
+.btn:hover { background: var(--orange-dark); transform: translateY(-1px); }
+.btn.secondary { background: var(--blue); }
+.btn.secondary:hover { background: var(--navy-light); }
+.btn.small { padding: 8px 16px; font-size: 13px; }
+.btn:disabled { background: #CBD5E0; cursor: not-allowed; transform: none; }
+/* ─── HERO ─── */
+.hero { text-align: center; padding: 40px 0 20px; }
+.hero .emoji { font-size: 64px; }
+.hero h1 { font-size: 36px; margin: 12px 0 8px; }
+.hero p { font-size: 17px; color: var(--gray); max-width: 560px; margin: 0 auto 24px; }
+.analogy {
+  background: var(--blue-soft); border-radius: 12px;
+  padding: 24px; margin: 24px auto; max-width: 640px; text-align: left;
+}
+.analogy h3 { margin-top: 0; }
+/* ─── SYNTAX DISPLAY ─── */
+.syntax-box {
+  background: var(--code-bg); border-radius: 10px;
+  padding: 18px 20px; font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 15px; overflow-x: auto; margin: 12px 0;
+}
+.syntax-box .fn { color: #fff; font-weight: 700; }
+.syn-part { cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: background .15s; position: relative; }
+.syn-part:hover { background: rgba(255,255,255,.12); }
+.syn-1 { color: #F4A261; } .syn-2 { color: #7EB8F7; } .syn-3 { color: #90EE90; } .syn-4 { color: #FFB3B3; }
+.syn-comma { color: #fff; }
+.arg-explain {
+  display: none; background: var(--yellow-soft);
+  border-left: 4px solid var(--orange);
+  padding: 12px 16px; border-radius: 0 8px 8px 0;
+  margin: 8px 0; font-size: 14px;
+}
+.arg-explain.show { display: block; animation: fadeIn .2s; }
+.arg-explain b { color: var(--navy); }
+/* ─── DATA TABLE ─── */
+table.data {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: #fff; border-radius: 8px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+table.data th {
+  background: var(--navy); color: #fff; padding: 8px 10px;
+  text-align: left; font-size: 12px;
+}
+table.data td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+table.data tr:last-child td { border-bottom: none; }
+table.data tr.highlight-search td { background: #FFF3CD; transition: background .3s; }
+table.data tr.highlight-found td { background: #D5F5E3; transition: background .3s; }
+table.data td.highlight-cell { background: var(--orange) !important; color: #fff; font-weight: 700; }
+.col-label { font-size: 10px; color: var(--gray); font-weight: 400; }
+/* ─── SIM ─── */
+.sim-controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.sim-controls button {
+  background: var(--blue-soft); border: 2px solid var(--blue);
+  color: var(--navy); border-radius: 8px; padding: 8px 14px;
+  font-weight: 700; cursor: pointer; font-size: 13px;
+}
+.sim-controls button:hover { background: var(--blue); color: #fff; }
+.sim-status {
+  background: var(--navy); color: #fff; border-radius: 8px;
+  padding: 12px 16px; font-size: 14px; margin: 12px 0; min-height: 48px;
+}
+.sim-status .formula-live { font-family: 'Consolas', monospace; color: var(--code-text); font-size: 13px; }
+/* ─── PRACTICE ─── */
+.challenge-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.challenge-tabs button {
+  background: #fff; border: 2px solid var(--border); border-radius: 20px;
+  padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--gray);
+}
+.challenge-tabs button.active { border-color: var(--orange); color: var(--orange-dark); background: #FFF4EC; }
+.challenge-tabs button.done { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+.formula-input {
+  width: 100%; font-family: 'Consolas', monospace; font-size: 14px;
+  padding: 12px 14px; border: 2px solid var(--border); border-radius: 8px;
+  background: #fff; color: var(--text);
+}
+.formula-input:focus { outline: none; border-color: var(--blue); }
+.feedback { border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 14px; display: none; }
+.feedback.show { display: block; animation: fadeIn .2s; }
+.feedback.ok { background: var(--green-soft); border-left: 4px solid var(--green); color: #14532D; }
+.feedback.err { background: var(--red-soft); border-left: 4px solid var(--red); color: #7F1D1D; }
+.hint-btn { background: none; border: none; color: var(--blue); font-size: 13px; cursor: pointer; text-decoration: underline; padding: 4px 0; }
+/* ─── QUIZ ─── */
+.quiz-q { font-weight: 700; margin-bottom: 12px; font-size: 15px; }
+.quiz-opts { display: grid; gap: 8px; }
+.quiz-opts button {
+  text-align: left; background: #fff; border: 2px solid var(--border);
+  border-radius: 8px; padding: 12px 16px; font-size: 14px; cursor: pointer;
+  font-family: inherit; transition: all .15s;
+}
+.quiz-opts button:hover:not(:disabled) { border-color: var(--blue); background: var(--blue-soft); }
+.quiz-opts button.correct { border-color: var(--green); background: var(--green-soft); }
+.quiz-opts button.wrong { border-color: var(--red); background: var(--red-soft); }
+.quiz-progress { font-size: 13px; color: var(--gray); margin-bottom: 8px; }
+.quiz-code { font-family: 'Consolas', monospace; background: var(--code-bg); color: var(--code-text); padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+/* ─── DODONT ─── */
+.dodont-item { margin-bottom: 12px; }
+.dodont-toggle {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  background: #fff; border: 2px solid var(--border); border-radius: 10px;
+  padding: 14px 18px; cursor: pointer; font-size: 15px; font-weight: 700;
+  color: var(--text); font-family: inherit;
+}
+.dodont-toggle:hover { border-color: var(--blue); }
+.dodont-body { display: none; padding: 14px 18px; }
+.dodont-body.show { display: block; }
+.vs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+@media (max-width: 640px) { .vs-row { grid-template-columns: 1fr; } }
+.vs-box { border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+.vs-box.bad { background: var(--red-soft); border: 1px solid #F5C6C0; }
+.vs-box.good { background: var(--green-soft); border: 1px solid #B7E4C7; }
+.vs-box .tag { font-size: 11px; font-weight: 800; display: inline-block; padding: 1px 8px; border-radius: 4px; color: #fff; margin-bottom: 6px; }
+.vs-box.bad .tag { background: var(--red); }
+.vs-box.good .tag { background: var(--green); }
+.vs-box code { font-family: 'Consolas', monospace; font-size: 12px; display: block; margin-top: 4px; word-break: break-all; }
+/* ─── GROUP TASK ─── */
+.timer-display {
+  font-size: 48px; font-weight: 800; text-align: center;
+  color: var(--navy); font-variant-numeric: tabular-nums;
+  padding: 8px 0;
+}
+.timer-display.warning { color: var(--orange-dark); }
+.timer-display.danger { color: var(--red); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .5; } }
+.timer-controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+.task-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 8px; margin-bottom: 6px; background: #fff; border: 1px solid var(--border); cursor: pointer; }
+.task-check:hover { border-color: var(--blue); }
+.task-check input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+.task-check.checked { background: var(--green-soft); border-color: var(--green); }
+.task-check.checked .task-label { text-decoration: line-through; color: var(--gray); }
+.task-label { font-size: 14px; flex: 1; }
+.locked-box { background: #F1F5F9; border: 2px dashed #CBD5E0; border-radius: 10px; padding: 20px; text-align: center; }
+.locked-box input { padding: 8px 12px; border: 2px solid var(--border); border-radius: 6px; font-size: 14px; width: 140px; text-align: center; }
+/* ─── CHEATSHEET ─── */
+.cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .cheat-grid { grid-template-columns: 1fr; } }
+.cheat-card { border-radius: 10px; padding: 16px; font-size: 13px; }
+.cheat-card h4 { font-size: 14px; margin-bottom: 8px; }
+.cheat-card code { font-family: 'Consolas', monospace; font-size: 12px; background: rgba(0,0,0,.06); padding: 1px 6px; border-radius: 4px; }
+.cheat-card.c1 { background: var(--blue-soft); }
+.cheat-card.c2 { background: var(--green-soft); }
+.cheat-card.c3 { background: var(--yellow-soft); }
+.cheat-card.c4 { background: #F3E8FF; }
+.progress-pill {
+  position: fixed; bottom: 16px; right: 16px; z-index: 99;
+  background: var(--navy); color: #fff; border-radius: 24px;
+  padding: 8px 18px; font-size: 13px; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+.step-flow { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin: 12px 0; font-size: 13px; }
+.step-flow .step { background: var(--blue-soft); border-radius: 6px; padding: 6px 10px; font-weight: 600; color: var(--navy); }
+.step-flow .arrow { color: var(--gray); }
+.badge { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 12px; margin-left: 6px; vertical-align: middle; }
+.badge.easy { background: var(--green-soft); color: var(--green); }
+.badge.med { background: var(--yellow-soft); color: #92600A; }
+.badge.hard { background: var(--red-soft); color: var(--red); }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <button data-s="s-home" class="active">🏠 Mulai</button>
+  <button data-s="s-intro">📖 Kenalan</button>
+  <button data-s="s-sim">🎮 Coba Sendiri</button>
+  <button data-s="s-quiz">✍️ Latihan</button>
+  <button data-s="s-dodont">⚠️ Jangan Begini</button>
+  <button data-s="s-group">👥 Tugas Kelompok</button>
+  <button data-s="s-cheat">📝 Cheat Sheet</button>
+</nav>
+
+<!-- ═══════════ SECTION 1: HOME ═══════════ -->
+<div class="section active" id="s-home">
+  <div class="hero">
+    <div class="emoji">🔍</div>
+    <h1>Belajar VLOOKUP & XLOOKUP</h1>
+    <p>Panduan interaktif untuk tim Operations EduPro. Tanpa jargon rumit — belajar sambil praktek langsung di browser.</p>
+    <button class="btn" onclick="goTo('s-intro')">Mulai Belajar →</button>
+  </div>
+
+  <div class="analogy">
+    <h3>📞 Bayangkan buku telepon...</h3>
+    <p>Kamu mau tahu nomor telepon <b>"Rizki Pratama"</b>. Apa yang kamu lakukan?</p>
+    <div class="step-flow">
+      <span class="step">1. Cari nama "Rizki" di kolom nama</span>
+      <span class="arrow">→</span>
+      <span class="step">2. Ketemu barisnya</span>
+      <span class="arrow">→</span>
+      <span class="step">3. Geser ke kolom nomor telepon</span>
+    </div>
+    <p style="margin-top:8px"><b>Itulah persis cara kerja VLOOKUP.</b> Bedanya: Excel melakukannya dalam 0,001 detik untuk ribuan baris. 🚀</p>
+  </div>
+
+  <div class="card">
+    <h3>Apa yang akan kamu pelajari di sini?</h3>
+    <div class="step-flow" style="flex-direction:column; align-items:flex-start">
+      <span class="step">📖 Kenalan — apa itu VLOOKUP & XLOOKUP, dijelaskan sesederhana mungkin</span>
+      <span class="step">🎮 Coba Sendiri — lihat animasi cara kerjanya + ketik formula beneran</span>
+      <span class="step">✍️ Latihan — 5 soal singkat untuk cek pemahaman</span>
+      <span class="step">⚠️ Jangan Begini — kesalahan paling umum & cara benarnya</span>
+      <span class="step">👥 Tugas Kelompok — panduan breakout 15 menit + timer</span>
+      <span class="step">📝 Cheat Sheet — ringkasan 1 layar, tinggal screenshot</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 2: INTRO ═══════════ -->
+<div class="section" id="s-intro">
+  <h1>📖 Kenalan Dulu</h1>
+  <p class="subtitle">Dua formula, satu tujuan: <b>mencari data secara otomatis.</b></p>
+
+  <div class="card">
+    <h3>1️⃣ VLOOKUP — si veteran</h3>
+    <p style="font-size:14px">Cari sesuatu di <b>kolom paling kiri</b> sebuah tabel, lalu ambil nilai dari kolom lain di baris yang sama.</p>
+    <div class="syntax-box">
+      <span class="fn">=VLOOKUP(</span><span class="syn-part syn-1" onclick="toggleArg('vl1')">yang_dicari</span><span class="syn-comma">, </span><span class="syn-part syn-2" onclick="toggleArg('vl2')">tabel_sumber</span><span class="syn-comma">, </span><span class="syn-part syn-3" onclick="toggleArg('vl3')">kolom_ke_berapa</span><span class="syn-comma">, </span><span class="syn-part syn-4" onclick="toggleArg('vl4')">FALSE</span><span class="fn">)</span>
+    </div>
+    <p style="font-size:12px; color:var(--gray)">👆 Klik tiap bagian berwarna untuk penjelasan</p>
+    <div class="arg-explain" id="vl1"><b>yang_dicari</b> (aslinya: lookup_value) — Nilai yang mau kamu cari. Contoh: Student_ID di cell B3.</div>
+    <div class="arg-explain" id="vl2"><b>tabel_sumber</b> (aslinya: table_array) — Tabel tempat mencari. <b>PENTING:</b> selalu kunci pakai $ (contoh: $A$2:$D$61) supaya tidak geser saat di-drag.</div>
+    <div class="arg-explain" id="vl3"><b>kolom_ke_berapa</b> (aslinya: col_index_num) — Angka kolom yang mau diambil, dihitung dari kiri tabel. Kolom 1 = tempat mencari, kolom 2 = data pertama setelahnya, dst.</div>
+    <div class="arg-explain" id="vl4"><b>FALSE</b> (aslinya: range_lookup) — Artinya "harus persis sama". Untuk mencari ID atau kode, <b>SELALU tulis FALSE.</b></div>
+  </div>
+
+  <div class="card">
+    <h3>2️⃣ XLOOKUP — si penerus yang lebih pintar</h3>
+    <p style="font-size:14px">Sama tujuannya, tapi lebih fleksibel: kamu langsung tunjuk <b>kolom tempat mencari</b> dan <b>kolom hasilnya</b>. Tidak perlu hitung-hitungan kolom.</p>
+    <div class="syntax-box">
+      <span class="fn">=XLOOKUP(</span><span class="syn-part syn-1" onclick="toggleArg('xl1')">yang_dicari</span><span class="syn-comma">, </span><span class="syn-part syn-2" onclick="toggleArg('xl2')">kolom_pencarian</span><span class="syn-comma">, </span><span class="syn-part syn-3" onclick="toggleArg('xl3')">kolom_hasil</span><span class="syn-comma">, </span><span class="syn-part syn-4" onclick="toggleArg('xl4')">"jika_tidak_ada"</span><span class="fn">)</span>
+    </div>
+    <p style="font-size:12px; color:var(--gray)">👆 Klik tiap bagian berwarna untuk penjelasan</p>
+    <div class="arg-explain" id="xl1"><b>yang_dicari</b> — Sama seperti VLOOKUP: nilai yang mau dicari.</div>
+    <div class="arg-explain" id="xl2"><b>kolom_pencarian</b> (aslinya: lookup_array) — Satu kolom tempat mencari. Contoh: $A$2:$A$61 (kolom Student_ID).</div>
+    <div class="arg-explain" id="xl3"><b>kolom_hasil</b> (aslinya: return_array) — Satu kolom yang nilainya mau diambil. Contoh: $B$2:$B$61 (kolom Nama).</div>
+    <div class="arg-explain" id="xl4"><b>"jika_tidak_ada"</b> (aslinya: if_not_found) — Teks yang muncul kalau data tidak ketemu. Contoh: "Tidak ditemukan". Ini bonus keren yang tidak dimiliki VLOOKUP!</div>
+  </div>
+
+  <div class="card" style="background:var(--green-soft); border-color:#B7E4C7">
+    <h3 style="margin-top:0">🤔 Jadi pakai yang mana?</h3>
+    <p style="font-size:14px">
+      <b>Pakai XLOOKUP</b> kalau Excel kamu versi 2019 ke atas / Microsoft 365 — lebih mudah & aman.<br>
+      <b>Pakai VLOOKUP</b> kalau Excel kantor masih versi lama, atau file akan dibuka orang lain yang Excel-nya lama.<br>
+      <span style="color:var(--gray); font-size:13px">Dua-duanya wajib dikuasai anak Ops. 💪</span>
+    </p>
+  </div>
+
+  <div style="text-align:center; margin-top:24px">
+    <button class="btn" onclick="goTo('s-sim')">Lanjut: Coba Sendiri →</button>
+  </div>
+</div>
+
+<!-- Sections 3-7 inserted by part 2 -->
+
+<!-- ═══════════ SECTION 3: SIMULASI + PRAKTIK ═══════════ -->
+<div class="section" id="s-sim">
+  <h1>🎮 Coba Sendiri</h1>
+  <p class="subtitle">Dua mode: lihat cara kerjanya dulu, lalu ketik formula beneran.</p>
+
+  <div class="card">
+    <h3>Mode 1 — Lihat Cara Kerja 👀</h3>
+    <p style="font-size:14px">Klik salah satu Student_ID di bawah, lalu perhatikan bagaimana VLOOKUP "berjalan" mencari data:</p>
+    <div class="sim-controls" id="simBtns"></div>
+    <div class="sim-status" id="simStatus">Klik ID di atas untuk mulai simulasi...</div>
+    <table class="data" id="simTable">
+      <thead><tr>
+        <th>Student_ID <span class="col-label">(kolom 1)</span></th>
+        <th>Nama <span class="col-label">(kolom 2)</span></th>
+        <th>Email <span class="col-label">(kolom 3)</span></th>
+        <th>Kota <span class="col-label">(kolom 4)</span></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Mode 2 — Ketik Formula Beneran ⌨️</h3>
+    <p style="font-size:14px">Sekarang giliran kamu. Ketik formula di kotak, tekan <b>Jalankan</b>, dan lihat hasilnya. Ada 6 challenge dari mudah ke menantang.</p>
+    <div class="challenge-tabs" id="chTabs"></div>
+    <div id="chBody"></div>
+    <h3 style="margin-top:20px">Data referensi:</h3>
+    <div style="display:grid; grid-template-columns:1fr; gap:12px">
+      <div>
+        <p style="font-size:12px; font-weight:700; color:var(--gray)">TABEL: Master_Siswa (range A1:D9 — header di baris 1, data mulai baris 2)</p>
+        <table class="data" id="masterTable">
+          <thead><tr><th>A: Student_ID</th><th>B: Nama</th><th>C: Email</th><th>D: Kota</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:12px; font-weight:700; color:var(--gray)">TABEL: Master_Program (range F1:H5)</p>
+        <table class="data" id="progTable">
+          <thead><tr><th>F: Kode</th><th>G: Nama_Program</th><th>H: Harga</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 4: QUIZ ═══════════ -->
+<div class="section" id="s-quiz">
+  <h1>✍️ Latihan</h1>
+  <p class="subtitle">5 soal singkat. Pilih jawaban, langsung dapat feedback.</p>
+  <div class="quiz-progress" id="quizProgress">Soal 1 dari 5 — Skor: 0</div>
+  <div class="card" id="quizCard"></div>
+  <div id="quizDone" style="display:none; text-align:center">
+    <div class="card">
+      <div style="font-size:56px">🎉</div>
+      <h2 id="quizScore" style="margin-top:0"></h2>
+      <p id="quizMsg" style="color:var(--gray)"></p>
+      <button class="btn small secondary" onclick="resetQuiz()">Ulangi Latihan</button>
+      <button class="btn small" onclick="goTo('s-dodont')">Lanjut →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 5: DO DONT ═══════════ -->
+<div class="section" id="s-dodont">
+  <h1>⚠️ Jangan Begini</h1>
+  <p class="subtitle">4 kesalahan paling umum. Klik untuk lihat salah vs benar.</p>
+  <div id="dodontList"></div>
+  <div class="card" style="background:var(--yellow-soft); border-color:#FFE082">
+    <b>💡 Fakta:</b> 80% error lookup disebabkan 2 hal — lupa kunci $ dan lupa tulis FALSE. Kuasai 2 itu dulu, sisanya mengikuti.
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 6: GROUP TASK ═══════════ -->
+<div class="section" id="s-group">
+  <h1>👥 Tugas Kelompok</h1>
+  <p class="subtitle">Breakout 15 menit — Refund Validation. Kerjakan di file <b>CaseStudy2_Refund_Breakout.xlsx</b>.</p>
+
+  <div class="card" style="background:var(--red-soft); border-color:#F5C6C0">
+    <h3 style="margin-top:0">📌 Konteks</h3>
+    <p style="font-size:14px">Tim Ops EduPro menerima <b>55 refund request</b> (Sep–Nov 2025). Tugas grup kamu: validasi tiap request — masih dalam refund window atau tidak — lalu hitung jumlah refund yang harus dibayarkan.</p>
+    <p style="font-size:13px; color:var(--gray); margin-top:6px">Kebijakan: Bootcamp = 80% (14 hari) · Kursus regular = 50% (7 hari) · Kelas pendek = 30% (3 hari) · Lewat window = Rp 0.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">⏱️ Timer 15 Menit</h3>
+    <div class="timer-display" id="timerDisplay">15:00</div>
+    <div class="timer-controls">
+      <button class="btn small" id="timerStart" onclick="startTimer()">▶ Mulai</button>
+      <button class="btn small secondary" onclick="pauseTimer()">⏸ Pause</button>
+      <button class="btn small secondary" onclick="resetTimer()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">✅ Checklist Task (centang sambil jalan)</h3>
+    <div id="taskList"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">🎯 Bonus Question (jawab di presentasi grup)</h3>
+    <ol style="font-size:14px; padding-left:20px">
+      <li>Berapa <b>total Refund_Amount</b> yang harus dikeluarkan EduPro? <span style="color:var(--gray)">(hint: SUM kolom O)</span></li>
+      <li>Berapa request yang <b>TIDAK eligible</b>? Berapa persen? <span style="color:var(--gray)">(hint: COUNTIF)</span></li>
+      <li><b>CS Agent</b> mana yang paling banyak handle request? <span style="color:var(--gray)">(hint: COUNTIF per agent)</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">🔒 Pembahasan</h3>
+    <div class="locked-box" id="lockedBox">
+      <p style="font-size:14px; margin-bottom:10px">Terkunci sampai timer habis, atau masukkan kode dari trainer:</p>
+      <input type="text" id="unlockCode" placeholder="kode trainer" onkeydown="if(event.key==='Enter')tryUnlock()">
+      <button class="btn small" onclick="tryUnlock()">Buka</button>
+      <p id="unlockErr" style="color:var(--red); font-size:12px; margin-top:6px; display:none">Kode salah. Coba lagi.</p>
+    </div>
+    <div id="answerBox" style="display:none">
+      <table class="data" style="font-size:12px">
+        <thead><tr><th>Kolom</th><th>Formula</th></tr></thead>
+        <tbody>
+          <tr><td>H (Nama_Siswa)</td><td><code>=XLOOKUP(B3, Master_Siswa!$A$2:$A$71, Master_Siswa!$B$2:$B$71, "Siswa tidak ditemukan")</code></td></tr>
+          <tr><td>I (Nama_Program)</td><td><code>=VLOOKUP(C3, Master_Program!$A$2:$G$21, 2, FALSE)</code></td></tr>
+          <tr><td>J (Harga)</td><td><code>=VLOOKUP(C3, Master_Program!$A$2:$G$21, 4, FALSE)</code></td></tr>
+          <tr><td>K (Refund_Window)</td><td><code>=VLOOKUP(C3, Master_Program!$A$2:$G$21, 6, FALSE)</code></td></tr>
+          <tr><td>L (Refund_Percent)</td><td><code>=VLOOKUP(C3, Master_Program!$A$2:$G$21, 7, FALSE)</code></td></tr>
+          <tr><td>M (Days_Since_Enroll)</td><td><code>=E3-D3</code></td></tr>
+          <tr><td>N (Eligible)</td><td><code>=IF(M3&lt;=K3, "YES", "NO")</code></td></tr>
+          <tr><td>O (Refund_Amount)</td><td><code>=IF(N3="YES", J3*L3, 0)</code></td></tr>
+          <tr><td>P (Nama_Agent)</td><td><code>=XLOOKUP(F3, Master_CS_Agent!$A$2:$A$11, Master_CS_Agent!$B$2:$B$11, "Unknown Agent")</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 7: CHEAT SHEET ═══════════ -->
+<div class="section" id="s-cheat">
+  <h1>📝 Cheat Sheet</h1>
+  <p class="subtitle">Ringkasan 1 layar — screenshot & simpan. 📸</p>
+  <div class="cheat-grid">
+    <div class="cheat-card c1">
+      <h4>🔍 VLOOKUP</h4>
+      <code>=VLOOKUP(dicari, $tabel$, kolom_ke, FALSE)</code>
+      <ul style="padding-left:16px; margin-top:8px">
+        <li>Cari di kolom PALING KIRI tabel</li>
+        <li>kolom_ke dihitung dari kiri (1,2,3...)</li>
+        <li>SELALU tulis FALSE untuk ID/kode</li>
+      </ul>
+    </div>
+    <div class="cheat-card c2">
+      <h4>⚡ XLOOKUP</h4>
+      <code>=XLOOKUP(dicari, $kolom_cari$, $kolom_hasil$, "kalau tidak ada")</code>
+      <ul style="padding-left:16px; margin-top:8px">
+        <li>Tunjuk langsung kolom cari & hasil</li>
+        <li>Argumen ke-4 = pesan jika tidak ketemu</li>
+        <li>Butuh Excel 2019+ / Microsoft 365</li>
+      </ul>
+    </div>
+    <div class="cheat-card c3">
+      <h4>🔒 Wajib Ingat</h4>
+      <ul style="padding-left:16px">
+        <li>Kunci range pakai <code>$</code> → tekan F4</li>
+        <li>Exact match: VLOOKUP pakai <code>FALSE</code></li>
+        <li>Test 2-3 baris dulu sebelum drag semua</li>
+        <li>Error jelek? Bungkus <code>IFERROR(...)</code></li>
+      </ul>
+    </div>
+    <div class="cheat-card c4">
+      <h4>🚀 Level Lanjut</h4>
+      <ul style="padding-left:16px">
+        <li>XLOOKUP arg ke-6 = <code>-1</code> → cari dari bawah (data terbaru)</li>
+        <li>XLOOKUP bisa return multi-kolom sekaligus</li>
+        <li>Chained lookup: hasil lookup jadi input lookup berikutnya</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px; text-align:center; background:var(--navy); color:#fff; border:none">
+    <p style="font-size:15px"><b>Ingat 2 hal ini saja kalau lupa semua:</b></p>
+    <p style="font-size:18px; color:var(--orange); font-weight:800">Kunci pakai $ &nbsp;·&nbsp; Selalu FALSE</p>
+  </div>
+</div>
+
+
+<script>
+/* ─── NAV ─── */
+function goTo(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.s === id));
+  window.scrollTo({top: 0});
+}
+document.getElementById('nav').addEventListener('click', e => {
+  if (e.target.dataset.s) goTo(e.target.dataset.s);
+});
+function toggleArg(id) {
+  document.getElementById(id).classList.toggle('show');
+}
+</script>
+
+<script>
+/* ═══ DATA ═══ */
+const MASTER = [
+  ["STU-001","Andi Pratama","andi.p@mail.com","Jakarta"],
+  ["STU-002","Siti Lestari","siti.l@mail.com","Bandung"],
+  ["STU-003","Budi Santoso","budi.s@mail.com","Surabaya"],
+  ["STU-004","Dewi Anggraini","dewi.a@mail.com","Jakarta"],
+  ["STU-005","Rizki Pratama","rizki.p@mail.com","Yogyakarta"],
+  ["STU-006","Maya Kusuma","maya.k@mail.com","Medan"],
+  ["STU-007","Fajar Hidayat","fajar.h@mail.com","Bandung"],
+  ["STU-008","Putri Rahmawati","putri.r@mail.com","Semarang"],
+];
+const PROG = [
+  ["BDA-001","Bootcamp Data Analyst",8500000],
+  ["KBI-006","Kursus Bahasa Inggris",1500000],
+  ["SXL-016","Excel Advanced",1450000],
+  ["PYB-018","Python for Beginner",1850000],
+];
+
+/* ═══ MODE 1: SIMULASI ═══ */
+const simTbody = document.querySelector("#simTable tbody");
+MASTER.slice(0,6).forEach(r => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = r.map(c => `<td>${c}</td>`).join("");
+  simTbody.appendChild(tr);
+});
+const simBtns = document.getElementById("simBtns");
+MASTER.slice(0,6).forEach((r,idx) => {
+  const b = document.createElement("button");
+  b.textContent = r[0];
+  b.onclick = () => runSim(idx);
+  simBtns.appendChild(b);
+});
+let simRunning = false;
+async function runSim(targetIdx) {
+  if (simRunning) return;
+  simRunning = true;
+  const rows = simTbody.querySelectorAll("tr");
+  const status = document.getElementById("simStatus");
+  const id = MASTER[targetIdx][0];
+  rows.forEach(r => { r.className=""; r.querySelectorAll("td").forEach(td=>td.classList.remove("highlight-cell")); });
+  status.innerHTML = `<span class="formula-live">=VLOOKUP("${id}", A2:D7, 2, FALSE)</span><br>Mulai mencari "${id}" dari baris pertama...`;
+  for (let i = 0; i <= targetIdx; i++) {
+    rows.forEach(r => r.classList.remove("highlight-search"));
+    rows[i].classList.add("highlight-search");
+    const rowId = MASTER[i][0];
+    if (i < targetIdx) {
+      status.innerHTML = `<span class="formula-live">=VLOOKUP("${id}", A2:D7, 2, FALSE)</span><br>Baris ${i+1}: "${rowId}" — bukan yang dicari, lanjut ke bawah... ⬇️`;
+    }
+    await new Promise(r => setTimeout(r, 550));
+  }
+  rows[targetIdx].classList.remove("highlight-search");
+  rows[targetIdx].classList.add("highlight-found");
+  status.innerHTML = `<span class="formula-live">=VLOOKUP("${id}", A2:D7, 2, FALSE)</span><br>✅ Ketemu di baris ${targetIdx+1}! Sekarang ambil <b>kolom ke-2</b>...`;
+  await new Promise(r => setTimeout(r, 900));
+  rows[targetIdx].querySelectorAll("td")[1].classList.add("highlight-cell");
+  status.innerHTML = `<span class="formula-live">=VLOOKUP("${id}", A2:D7, 2, FALSE)</span><br>🎉 Hasil: <b>"${MASTER[targetIdx][1]}"</b> — nilai dari kolom ke-2 di baris yang ketemu.`;
+  simRunning = false;
+}
+
+/* ═══ MODE 2: PRACTICE ═══ */
+const mtb = document.querySelector("#masterTable tbody");
+MASTER.forEach(r => { const tr = document.createElement("tr"); tr.innerHTML = r.map(c=>`<td>${c}</td>`).join(""); mtb.appendChild(tr); });
+const ptb = document.querySelector("#progTable tbody");
+PROG.forEach(r => { const tr = document.createElement("tr"); tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>Rp${r[2].toLocaleString("id")}</td>`; ptb.appendChild(tr); });
+
+const CHALLENGES = [
+  { title:"1. Cari Nama", level:"easy", desc:'Cari <b>nama</b> siswa dengan ID <b>"STU-003"</b> pakai VLOOKUP. Tabel siswa ada di range <code>A2:D9</code>.',
+    expect:"Budi Santoso", hint:'Nama ada di kolom ke-2. Jangan lupa FALSE!<br>Pola: =VLOOKUP("STU-003", $A$2:$D$9, ?, FALSE)',
+    check: f => reqVL(f, "stu-003", 2) },
+  { title:"2. Cari Email", level:"easy", desc:'Cari <b>email</b> siswa <b>"STU-005"</b> pakai VLOOKUP.',
+    expect:"rizki.p@mail.com", hint:"Email adalah kolom ke-3 di tabel A2:D9.",
+    check: f => reqVL(f, "stu-005", 3) },
+  { title:"3. Cari Kota", level:"easy", desc:'Cari <b>kota</b> siswa <b>"STU-007"</b>. Boleh VLOOKUP atau XLOOKUP.',
+    expect:"Bandung", hint:'VLOOKUP: kolom ke-4. XLOOKUP: kolom cari $A$2:$A$9, kolom hasil $D$2:$D$9.',
+    check: f => reqVL(f, "stu-007", 4) || reqXL(f, "stu-007", "d") },
+  { title:"4. XLOOKUP Harga", level:"med", desc:'Pakai <b>XLOOKUP</b>: cari <b>harga</b> program <b>"PYB-018"</b>. Kolom kode = F2:F5, kolom harga = H2:H5.',
+    expect:"Rp1.850.000", hint:'=XLOOKUP("PYB-018", $F$2:$F$5, $H$2:$H$5)',
+    check: f => reqXL(f, "pyb-018", "h") },
+  { title:"5. if_not_found", level:"med", desc:'Cari nama siswa <b>"STU-999"</b> (tidak ada!) pakai XLOOKUP dengan pesan <b>"Tidak ditemukan"</b> kalau gagal.',
+    expect:"Tidak ditemukan", hint:'Tambahkan argumen ke-4: =XLOOKUP("STU-999", $A$2:$A$9, $B$2:$B$9, "Tidak ditemukan")',
+    check: f => { const c=clean(f); return c.includes("xlookup") && c.includes("stu-999") && (c.includes('"tidak ditemukan"') || c.includes("'tidak ditemukan'")); } },
+  { title:"6. IFERROR", level:"hard", desc:'Pakai <b>VLOOKUP dibungkus IFERROR</b>: cari nama <b>"STU-999"</b>, kalau error tampilkan <b>"Data kosong"</b>.',
+    expect:"Data kosong", hint:'=IFERROR(VLOOKUP("STU-999", $A$2:$D$9, 2, FALSE), "Data kosong")',
+    check: f => { const c=clean(f); return c.includes("iferror") && c.includes("vlookup") && c.includes("stu-999") && (c.includes('"data kosong"') || c.includes("'data kosong'")); } },
+];
+function clean(f){ return f.toLowerCase().replace(/\s+/g,""); }
+function reqVL(f, id, col){ const c=clean(f); return c.includes("vlookup") && c.includes(id) && new RegExp(`,${col},false\\)$`).test(c); }
+function reqXL(f, id, retCol){ const c=clean(f); if(!c.includes("xlookup")||!c.includes(id))return false; const parts=c.split(","); return parts.length>=3 && parts[2].startsWith(`$${retCol}$`)||parts[2].startsWith(retCol); }
+
+/* diagnostics untuk feedback spesifik */
+function diagnose(f, ch) {
+  const c = clean(f);
+  if (!c.startsWith("=")) return "Formula harus diawali tanda sama dengan (=).";
+  if (ch.check.toString().includes("iferror") && !c.includes("iferror")) return "Challenge ini minta pakai IFERROR di luar VLOOKUP.";
+  if (c.includes("vlookup")) {
+    if (!/false\)/.test(c) && !c.includes("iferror")) return "Kamu belum pakai FALSE di argumen terakhir. Untuk ID unik, WAJIB FALSE.";
+    if (!c.includes("$")) return "Range kamu belum dikunci pakai $. Di dunia nyata, formula akan geser saat di-drag. Tambahkan $ (contoh: $A$2:$D$9).";
+  }
+  if (c.includes("xlookup") && !c.includes("$")) return "Tips: kunci range pakai $ supaya aman saat drag ($A$2:$A$9).";
+  return "Belum tepat. Cek lagi: ID yang dicari, range tabel, dan nomor/posisi kolom.";
+}
+
+let currentCh = 0;
+const doneCh = new Set();
+function renderChTabs() {
+  const el = document.getElementById("chTabs");
+  el.innerHTML = "";
+  CHALLENGES.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.textContent = (doneCh.has(i) ? "✓ " : "") + c.title;
+    b.className = (i===currentCh ? "active " : "") + (doneCh.has(i) ? "done" : "");
+    b.onclick = () => { currentCh = i; renderCh(); };
+    el.appendChild(b);
+  });
+}
+function renderCh() {
+  renderChTabs();
+  const ch = CHALLENGES[currentCh];
+  const lv = { easy:"Mudah", med:"Sedang", hard:"Menantang" }[ch.level];
+  document.getElementById("chBody").innerHTML = `
+    <p style="font-size:14px; margin-bottom:10px">${ch.desc} <span class="badge ${ch.level}">${lv}</span></p>
+    <input class="formula-input" id="chInput" placeholder='Ketik formula di sini, contoh: =VLOOKUP(...)' autocomplete="off">
+    <div style="margin-top:10px; display:flex; gap:8px; align-items:center">
+      <button class="btn small" onclick="runCh()">▶ Jalankan</button>
+      <button class="hint-btn" onclick="document.getElementById('chHint').classList.toggle('show')">💡 Lihat hint</button>
+    </div>
+    <div class="feedback" id="chHint" style="background:var(--yellow-soft); border-left:4px solid var(--orange); color:#5D4037">${ch.hint}</div>
+    <div class="feedback" id="chFb"></div>`;
+  document.getElementById("chInput").addEventListener("keydown", e => { if (e.key === "Enter") runCh(); });
+}
+function runCh() {
+  const ch = CHALLENGES[currentCh];
+  const val = document.getElementById("chInput").value.trim();
+  const fb = document.getElementById("chFb");
+  fb.classList.add("show");
+  if (!val) { fb.className = "feedback show err"; fb.innerHTML = "Ketik formulanya dulu ya. 😊"; return; }
+  if (ch.check(val)) {
+    doneCh.add(currentCh);
+    fb.className = "feedback show ok";
+    fb.innerHTML = `✅ <b>Benar!</b> Hasil formula: <b>${ch.expect}</b>` + (currentCh < CHALLENGES.length-1 ? ` — <a href="#" onclick="currentCh++;renderCh();return false">lanjut challenge berikutnya →</a>` : " 🎉 Semua challenge selesai!");
+    renderChTabs();
+  } else {
+    fb.className = "feedback show err";
+    fb.innerHTML = "❌ " + diagnose(val, ch);
+  }
+}
+renderCh();
+
+/* ═══ QUIZ ═══ */
+const QUIZ = [
+  { q:"Untuk mencari data pakai Student_ID (kode unik), argumen terakhir VLOOKUP harus...",
+    opts:["TRUE","FALSE","1","Kosongkan saja"], a:1,
+    exp:"FALSE artinya exact match — hanya cocok kalau nilainya persis sama. Wajib untuk ID/kode." },
+  { q:'Formula <span class="quiz-code">=VLOOKUP(B3, A2:F61, 2, FALSE)</span> di-drag ke bawah, hasilnya kacau. Kenapa?',
+    opts:["Kurang IFERROR","Range A2:F61 belum dikunci pakai $","Harusnya pakai TRUE","Kolom 2 salah"], a:1,
+    exp:"Tanpa $, range ikut geser saat drag: A2:F61 jadi A3:F62, dst. Kunci jadi $A$2:$F$61." },
+  { q:"Keunggulan XLOOKUP yang TIDAK dimiliki VLOOKUP adalah...",
+    opts:["Bisa cari data","Bisa pakai FALSE","Punya if_not_found built-in","Bisa dipakai di semua versi Excel"], a:2,
+    exp:"XLOOKUP punya argumen ke-4 (if_not_found) untuk handle data tidak ketemu — tanpa IFERROR tambahan." },
+  { q:"Nama siswa ada di kolom ke-3 dari tabel master. Di VLOOKUP, angka berapa yang ditulis?",
+    opts:["1","2","3","C"], a:2,
+    exp:"col_index_num dihitung dari kolom paling kiri tabel: kolom pertama = 1, ketiga = 3." },
+  { q:"Hasil lookup muncul error karena ID tidak ada di master. Cara paling rapi menanganinya?",
+    opts:["Biarkan saja","Hapus barisnya","Pakai XLOOKUP dengan if_not_found atau bungkus IFERROR","Ganti ID-nya manual"], a:2,
+    exp:'if_not_found / IFERROR mengubah error jadi pesan rapi seperti "Tidak ditemukan" — laporan tetap profesional.' },
+];
+let qIdx = 0, qScore = 0, qAnswered = false;
+function renderQuiz() {
+  const card = document.getElementById("quizCard");
+  document.getElementById("quizDone").style.display = "none";
+  card.style.display = "block";
+  qAnswered = false;
+  const q = QUIZ[qIdx];
+  document.getElementById("quizProgress").textContent = `Soal ${qIdx+1} dari ${QUIZ.length} — Skor: ${qScore}`;
+  card.innerHTML = `<div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((o,i)=>`<button onclick="answerQuiz(${i})">${o}</button>`).join("")}</div>
+    <div class="feedback" id="qFb"></div>
+    <div style="margin-top:12px; display:none" id="qNext"><button class="btn small" onclick="nextQuiz()">Soal berikutnya →</button></div>`;
+}
+function answerQuiz(i) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const q = QUIZ[qIdx];
+  const btns = document.querySelectorAll("#quizCard .quiz-opts button");
+  btns.forEach(b => b.disabled = true);
+  btns[q.a].classList.add("correct");
+  const fb = document.getElementById("qFb");
+  fb.classList.add("show");
+  if (i === q.a) { qScore++; fb.className = "feedback show ok"; fb.innerHTML = "✅ Benar! " + q.exp; }
+  else { btns[i].classList.add("wrong"); fb.className = "feedback show err"; fb.innerHTML = "❌ Kurang tepat. " + q.exp; }
+  document.getElementById("quizProgress").textContent = `Soal ${qIdx+1} dari ${QUIZ.length} — Skor: ${qScore}`;
+  document.getElementById("qNext").style.display = "block";
+}
+function nextQuiz() {
+  qIdx++;
+  if (qIdx >= QUIZ.length) {
+    document.getElementById("quizCard").style.display = "none";
+    document.getElementById("quizDone").style.display = "block";
+    document.getElementById("quizScore").textContent = `Skor kamu: ${qScore} / ${QUIZ.length}`;
+    document.getElementById("quizMsg").textContent = qScore === 5 ? "Sempurna! Kamu siap pakai lookup di kerjaan beneran." : qScore >= 3 ? "Bagus! Ulangi bagian yang salah untuk mantap." : "Tidak apa-apa — coba baca ulang bagian Kenalan lalu ulangi latihan.";
+  } else renderQuiz();
+}
+function resetQuiz() { qIdx = 0; qScore = 0; renderQuiz(); }
+renderQuiz();
+
+/* ═══ DO DONT ═══ */
+const DODONT = [
+  { t:"Lupa mengunci range pakai $", bad:"=VLOOKUP(B3, A2:F61, 2, FALSE)", good:"=VLOOKUP(B3, $A$2:$F$61, 2, FALSE)",
+    exp:"Tanpa $, range ikut bergeser saat formula di-drag ke bawah — hasil jadi salah semua. Blok range lalu tekan F4." },
+  { t:"Pakai TRUE untuk ID unik", bad:"=VLOOKUP(B3, $A$2:$F$61, 2, TRUE)", good:"=VLOOKUP(B3, $A$2:$F$61, 2, FALSE)",
+    exp:"TRUE = perkiraan terdekat, bisa salah ambil data orang lain! FALSE = harus persis sama. Untuk ID, selalu FALSE." },
+  { t:"Menghitung nomor kolom manual di tabel lebar", bad:"=VLOOKUP(B3, $A$2:$Z$61, 14, FALSE)", good:"=XLOOKUP(B3, $A$2:$A$61, $N$2:$N$61)",
+    exp:"Menghitung kolom ke-14 rawan salah, dan rusak kalau ada kolom baru disisipkan. XLOOKUP langsung tunjuk kolomnya." },
+  { t:"Membiarkan error tampil di laporan", bad:"=VLOOKUP(B3, $A$2:$F$61, 2, FALSE)", good:'=IFERROR(VLOOKUP(...), "Tidak ada")',
+    exp:"Error yang tampil bikin laporan terlihat tidak profesional. Bungkus IFERROR atau pakai if_not_found di XLOOKUP." },
+];
+const ddEl = document.getElementById("dodontList");
+DODONT.forEach((d, i) => {
+  const div = document.createElement("div");
+  div.className = "dodont-item";
+  div.innerHTML = `<button class="dodont-toggle" onclick="this.nextElementSibling.classList.toggle('show'); this.querySelector('.chev').textContent = this.nextElementSibling.classList.contains('show') ? '▲' : '▼'">
+    <span>❌ ${d.t}</span><span class="chev">▼</span></button>
+    <div class="dodont-body">
+      <div class="vs-row">
+        <div class="vs-box bad"><span class="tag">SALAH</span><code>${d.bad}</code></div>
+        <div class="vs-box good"><span class="tag">BENAR</span><code>${d.good}</code></div>
+      </div>
+      <p style="font-size:13px; margin-top:10px; color:var(--gray)">${d.exp}</p>
+    </div>`;
+  ddEl.appendChild(div);
+});
+
+/* ═══ GROUP TASK ═══ */
+const TASKS = [
+  "Task 1 — Lookup Nama_Siswa dari Student_ID (kolom H)",
+  "Task 2 — Lookup Nama_Program dari Kode_Program (kolom I)",
+  "Task 3 — Lookup Harga program (kolom J)",
+  "Task 4 — Lookup Refund_Window & Refund_Percent (kolom K & L)",
+  "Task 5 — Hitung Days_Since_Enroll = Tanggal_Request − Tanggal_Enroll (kolom M)",
+  "Task 6 — Tentukan Eligible: YES jika masih dalam window (kolom N)",
+  "Task 7 — Hitung Refund_Amount = Harga × Percent jika eligible (kolom O)",
+  "Task 8 — Lookup Nama_Agent, handle agent tidak terdaftar (kolom P)",
+];
+const tl = document.getElementById("taskList");
+TASKS.forEach((t, i) => {
+  const label = document.createElement("label");
+  label.className = "task-check";
+  label.innerHTML = `<input type="checkbox" onchange="this.parentElement.classList.toggle('checked', this.checked)"><span class="task-label">${t}</span>`;
+  tl.appendChild(label);
+});
+
+/* timer */
+let timerSec = 15 * 60, timerInt = null;
+function fmtTime(s){ return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; }
+function updateTimer() {
+  const el = document.getElementById("timerDisplay");
+  el.textContent = fmtTime(timerSec);
+  el.className = "timer-display" + (timerSec <= 60 ? " danger" : timerSec <= 180 ? " warning" : "");
+}
+function startTimer() {
+  if (timerInt) return;
+  timerInt = setInterval(() => {
+    timerSec--;
+    updateTimer();
+    if (timerSec <= 0) { clearInterval(timerInt); timerInt = null; unlockAnswers(); document.getElementById("timerDisplay").textContent = "WAKTU HABIS!"; }
+  }, 1000);
+}
+function pauseTimer() { clearInterval(timerInt); timerInt = null; }
+function resetTimer() { pauseTimer(); timerSec = 15*60; updateTimer(); }
+function tryUnlock() {
+  const code = document.getElementById("unlockCode").value.trim().toLowerCase();
+  if (code === "edupro" || code === "xlookup") unlockAnswers();
+  else document.getElementById("unlockErr").style.display = "block";
+}
+function unlockAnswers() {
+  document.getElementById("lockedBox").style.display = "none";
+  document.getElementById("answerBox").style.display = "block";
+}
+</script>
+</body>
+</html>
